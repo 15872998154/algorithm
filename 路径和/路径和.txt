@@ -1,0 +1,85 @@
+#include <stdio.h>  
+   
+#define N 6  
+#define M 7  
+#define MID 5  
+
+void getMax(int a[M][4],int left, int right,int *max, int *j)  
+{  
+       int lmax,rmax,lj,rj,mid;  
+   
+       if(left < 0) {  
+              left= 0;  
+       }  
+       if(right > M - 1) {  
+              right= M - 1;  
+       }  
+   
+       if(left == right) {  
+              *max= a[left][1];  
+              *j= left;  
+   
+       }else if(left == right - 1) {  
+              *max= a[left][1] >= a[right][1] ? a[left][1] : a[right][1];  
+              *j= a[left][1] >= a[right][1] ? left : right;  
+   
+       }else {  
+              mid= (left + right) / 2;  
+              getMax(a,left, mid, &lmax, &lj);  
+              getMax(a,mid + 1, right, &rmax, &rj);  
+   
+              *max= lmax >= rmax ? lmax : rmax;  
+              *j= lmax >= rmax ? lj : rj;  
+   
+       }  
+}  
+   
+int main()  
+{  
+       
+       int data[N][M][4];  
+       printf("从底到顶输入每行的数据：\n");  
+       int i, j;  
+       //为方便计算，从底部开始录入，最终输出的时候逆向输出  
+       for(i = 0; i < N; i++) {  
+              for(j = 0; j < M; j++) {  
+                     scanf("%d",&data[i][j][0]);  
+                     data[i][j][1]= data[i][j][0];  
+                     data[i][j][2]= data[i][j][3] = 0;  
+              }  
+       }  
+   
+       printf("正在运算\n");  
+   
+       for(i = N - 2; i >= 0; i--) {  
+              for(j = 0; j < M; j++) {  
+                     int maxdata, maxdataj;  
+                     getMax(data[i+ 1], j - MID/2, j + MID/2, &maxdata, &maxdataj);//得到每次5个方向的最大的数以及下标  
+   
+                     data[i][j][1]+= data[i + 1][maxdataj][1];  
+                     data[i][j][2]= maxdataj; 
+              }  
+       }  
+   
+       int maxdata,maxdataj;  
+       getMax(data[i+ 1], MID - 2, MID + 2, &maxdata, &maxdataj);  
+       printf("最大和为：%d\n",maxdata);  
+       data[0][maxdataj][3]= 1;  
+       for(i = 1; i < N; i++) {  
+              maxdataj= data[i - 1][maxdataj][2];  
+              data[i][maxdataj][3]= 1;  
+       }  
+   
+       //输出路径，按照题目格式输出，并且1表示所走路径  
+       for(i = N - 1; i >= 0; i--) {  
+              for(j = 0; j < M; j++) {  
+                     printf("%d\t",data[i][j][3]);  
+              }  
+              printf("\n");  
+       }  
+       for(i = 0; i < N/2; i++) {  
+              printf("\t");  
+       }  
+       printf("人\n");  
+       return 0;  
+}  
