@@ -1,0 +1,91 @@
+#include<iostream>
+#include<string>
+#include<list>
+#define M 8
+#define N 8
+using namespace std;
+
+/*
+每次按照dir的方向进行深度优先搜索，可以走则走并标记，否则，
+回溯并清除标记，直到找到右下角的出口。
+*/
+
+// 迷宫，Maze[i][j] = 0 代表ij可以走, arr[i][j]=1表示不能走
+int Maze[M+2][N+2] = {
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 1, 1, 0, 1, 1, 1},
+        {1, 1, 1, 0, 1, 1, 0, 1, 1, 1},
+        {1, 1, 0, 0, 0, 0, 0, 1, 1, 1},
+        {1, 1, 0, 0, 1, 1, 1, 0, 0, 1},
+        {1, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 0, 1, 0, 1, 0, 0, 1, 1},
+        {1, 0, 0, 1, 1, 1, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+};
+
+// 四个方向，分别代表上，下，左，右
+int dir[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+// 节点信息，x代表横坐标，y代表纵坐标
+struct Node
+{
+    int x;
+    int y;
+    Node (int x1, int y1):x(x1), y(y1) {}
+};
+
+
+// 打印路径，使用链表，易于输出
+void print_path(list<Node> path)
+{
+    while(!path.empty())
+    {
+        cout << "(" << path.front().x << "," << path.front().y << ")" << endl;
+        path.pop_front();
+    }
+}
+
+int DFS(Node cur, Node end, list<Node> &path)
+{
+    Maze[cur.x][cur.y] = 1;     // 标记此节点已走过
+    path.push_back(cur);        // 将此节点加入路径栈
+
+    // 当前坐标等于结束坐标时结束遍历，并打印路径
+    if(cur.x == end.x && cur.y == end.y)
+    {
+        print_path(path);       //打印路径
+        return 1;
+    }
+
+    // 从4个方向分别探索
+    for(int i = 0; i < 4; ++i)
+    {
+        // 构造下一个要进行探索的点
+        Node next(cur.x + dir[i][0], cur.y + dir[i][1]);
+        //  判断下个点是否可行
+        if(Maze[next.x][next.y] == 0)
+        {
+            // 递归进行下一位置的查找
+            // 如果一直可以先向下查找，直到找到终点，最底层函数就会返回1，接着返回到倒数第二层，执行if语句，接着返回1。
+            // 直到跳出整个递归函数。
+            if(DFS(next, end, path) == 1)
+                return 1;
+        }
+    }
+
+    // 如果该节点几个方向均已遍历，而且都不可行，该节点出栈，回溯
+    path.pop_back();
+
+    return 0;
+}
+
+int main( )
+{
+    list<Node> path;            // 存取路径
+    Node sta(1, 1), end(8, 8);  // 记录开始和结束坐标
+
+    if(DFS(sta, end, path) == 0)
+        cout << "no path" << endl;
+}
+
